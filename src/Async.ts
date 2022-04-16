@@ -3,27 +3,35 @@
 который завершится через заданное количество миллисекунд со значением, переданным в аргумент.
  */
 export function mock(ms: number): Promise<number> {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(ms);
+        }, ms);
+    });
 }
 
 /*
 Перепишите функцию getData так, чтобы она выполнялась быстрее.
  */
-export function getData(): Promise<number[]> {
+export async function getData(): Promise<number[]> {
     const result: number[] = [];
-
-    return mock(100)
-        .then((data1) => {
-            result.push(data1);
-            return mock(200);
-        })
-        .then((data2) => {
-            result.push(data2);
-            return mock(300);
-        })
-        .then((data3) => {
-            result.push(data3);
-            return result;
+    return new Promise((resolve, reject) => {
+        mock(100).then((data) => {
+            result.push(data);
         });
+        mock(200).then((data) => {
+            result.push(data);
+        });
+        mock(300).then((data) => {
+            result.push(data);
+            resolve(result);
+        });
+    });
+
+    // result.push(await mock(100));
+    // result.push(await mock(200));
+    // result.push(await mock(300));
+    // return result;
 }
 
 /*
@@ -31,9 +39,7 @@ export function getData(): Promise<number[]> {
 завершенный с ошибкой Promise и возвращал текст ошибки.
  */
 export async function catchException(): Promise<string | undefined> {
-    try {
-        Promise.reject(new Error('my error'));
-    } catch (err) {
+    return Promise.reject(new Error('my error')).catch((err) => {
         return err.message;
-    }
+    });
 }
